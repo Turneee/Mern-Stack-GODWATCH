@@ -87,7 +87,7 @@ const Address = ({
           <AddressForm
             withoutLayout={true}
             onSubmitForm={onAddressSubmit}
-            onCancel={() => {}}
+            onCancel={() => { }}
           />
         )}
       </div>
@@ -104,6 +104,9 @@ const CheckoutPage = (props) => {
   const [confirmAddress, setConfirmAddress] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [orderSummary, setOrderSummary] = useState(false);
+  const [orderConfirmation, setOrderConfirmation] = useState(false);
+  const [paymentOption, setPaymentOtion] = useState(false);
+  const [ confirmOrder, setConfirmOrder ] = useState(false);
   const cart = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
@@ -136,6 +139,19 @@ const CheckoutPage = (props) => {
     setAddress(updatedAddress);
   };
 
+  const userOrderConfirmation = () => {
+    setOrderConfirmation(true);
+    orderSummary(false);
+    setPaymentOtion(true);
+  };
+
+  const onComfirmOrder = () => {
+    const payload = {
+      "addressId": "5fb"
+    }
+    setConfirmOrder(true);
+  };
+
   useEffect(() => {
     auth.authenticate && dispatch(getAddress());
     auth.authenticate && dispatch(getCartItems());
@@ -150,6 +166,16 @@ const CheckoutPage = (props) => {
     setAddress(address);
     //user.address.length === 0 && setNewAddress(true);
   }, [user.address]);
+
+  if(confirmOrder){
+    return(
+      <Layout>
+        <Card>
+          <div>Thank You</div>
+        </Card>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -180,7 +206,7 @@ const CheckoutPage = (props) => {
             body={
               <>
                 {confirmAddress ? (
-                  <div>{`${selectedAddress.address} - ${selectedAddress.pinCode}`}</div>
+                  <div className="stepCompleted">{`${selectedAddress.name} ${selectedAddress.address} - ${selectedAddress.pinCode}`}</div>
                 ) : (
                   address.map((adr) => (
                     <Address
@@ -198,7 +224,7 @@ const CheckoutPage = (props) => {
 
           {/* AddressForm */}
           {confirmAddress ? null : newAddress ? (
-            <AddressForm onSubmitForm={onAddressSubmit} onCancel={() => {}} />
+            <AddressForm onSubmitForm={onAddressSubmit} onCancel={() => { }} />
           ) : auth.authenticate ? (
             <CheckoutStep
               stepNumber={"+"}
@@ -212,12 +238,70 @@ const CheckoutPage = (props) => {
             stepNumber={"3"}
             title={"ORDER SUMMARY"}
             active={orderSummary}
-            body={orderSummary ? <CartPage onlyCartItems={true} /> : null}
+            body={
+              orderSummary ? (
+                <CartPage onlyCartItems={true} />
+              ) : orderConfirmation ? (
+                <div className="stepCompleted">{Object.keys(cart.cartItems).length}items</div>
+              ) : null
+            }
           />
 
-          <CheckoutStep stepNumber={"4"} title={"PAYMENT OPTIONS"} />
+          {
+            orderSummary &&
+            <Card
+              style={{
+                margin: "10px 0",
+              }}
+            >
+              <div
+                className="flexRow sb"
+                style={{
+                  padding: "20px",
+                  alignItems: "center",
+                }}
+              >
+                <p style={{ fontSize: "12px" }}>
+                  Order confirmation email will be sent to {" "}
+                  <strong> {auth.user.email} </strong>
+                </p>
+                <MaterialButton
+                  title="CONTINUE"
+                  onClick={userOrderConfirmation}
+                  style={{
+                    width: "200px",
+                  }}
+                />
+              </div>
+            </Card>
+          }
+
+
+          <CheckoutStep
+            stepNumber={"4"}
+            title={"PAYMENT OPTIONS"}
+            active={paymentOption}
+            body={
+              paymentOption && (
+                <div className="flexRow stepCompleted">
+                  <div className="flexRow">
+                    <input type="radio" name="paymentOption" value="cod" />
+                    <div>Cash on delivery</div>
+                  </div>
+                  <MaterialButton
+                    title="CONFIRM ORDER"
+                    onClick={onComfirmOrder}
+                    style={{
+                      width: "200px",
+                      margin: "0 0 20px 20px",
+                    }}
+                  />
+                </div>
+              )
+            }
+          />
         </div>
- 
+
         {/* Price Component */}
         <PriceDetails
           totalItem={Object.keys(cart.cartItems).reduce(function (qty, key) {

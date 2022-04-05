@@ -3,7 +3,8 @@ import './style.css'
 import LOGO from '../../images/logo/LOGO.JPG'  
 import { IoIosArrowDown, IoIosCart, IoIosSearch } from 'react-icons/io'  
 import { useDispatch, useSelector } from 'react-redux'  
-import { login, signout } from '../../actions'  
+import { login, signout } from '../../actions'
+
 
 import {
   Modal,
