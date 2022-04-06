@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAddress, getCartItems } from "../../actions";
+import { addOrder, getAddress, getCartItems } from "../../actions";
 
 import {
   Anchor,
@@ -141,14 +141,32 @@ const CheckoutPage = (props) => {
 
   const userOrderConfirmation = () => {
     setOrderConfirmation(true);
-    orderSummary(false);
+    setOrderSummary(false);
     setPaymentOtion(true);
   };
 
-  const onComfirmOrder = () => {
+  const onConfirmOrder = () => {
+    const totalAmount = Object.keys(cart.cartItems).reduce(
+      (totalPrice, key) => {
+        const { price, qty } = cart.cartItems[key];
+        return totalPrice + price * qty;
+      },
+      0
+    );
+    const items = Object.keys(cart.cartItems).map(key => ({
+      productId: key, 
+      payablePrice: cart.cartItems[key].price,
+      purchasedQty: cart.cartItems[key].qty,
+    }));
     const payload = {
-      "addressId": "5fb"
-    }
+      addressId: selectedAddress._id,
+      totalAmount,
+      items,
+      paymentStatus: "pending",
+    };
+
+    console.log(payload);
+    dispatch(addOrder(payload));
     setConfirmOrder(true);
   };
 
@@ -167,11 +185,11 @@ const CheckoutPage = (props) => {
     //user.address.length === 0 && setNewAddress(true);
   }, [user.address]);
 
-  if(confirmOrder){
-    return(
+  if (confirmOrder) {
+    return (
       <Layout>
         <Card>
-          <div>Thank You</div>
+          <div>Thank you</div>
         </Card>
       </Layout>
     );
@@ -290,7 +308,7 @@ const CheckoutPage = (props) => {
                   </div>
                   <MaterialButton
                     title="CONFIRM ORDER"
-                    onClick={onComfirmOrder}
+                    onClick={onConfirmOrder}
                     style={{
                       width: "200px",
                       margin: "0 0 20px 20px",

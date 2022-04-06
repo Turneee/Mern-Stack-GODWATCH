@@ -2,12 +2,14 @@ import { userConstants } from "../actions/constants"
 
 const initState = {
     address: [],
+    orders: [],
     error: null,
-    loading: false
+    loading: false,
+    orderFetching: false
 }
 
 export default (state = initState, action) => {
-    switch(action.type){
+    switch (action.type) {
         case userConstants.GET_USER_ADDRESS_REQUEST:
             state = {
                 ...state,
@@ -26,7 +28,27 @@ export default (state = initState, action) => {
                 ...state,
                 loading: false,
                 error: action.payload.error
-            }
+            };
+            break;
+        case userConstants.GET_USER_ORDER_REQUEST:
+            state ={
+                ...state,
+                orderFetching: true,
+            };
+            break;
+        case userConstants.GET_USER_ORDER_SUCCESS:
+            state ={
+                ...state,
+                orders: action.payload.orders,
+                orderFetching: false,
+            };
+            break;
+        case userConstants.GET_USER_ORDER_FAILURE:
+            state ={
+                ...state,
+                error: action.payload.error,
+                orderFetching: false
+            };
             break;
     }
 

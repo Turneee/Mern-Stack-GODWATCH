@@ -6,7 +6,6 @@ import cartReducer from './cart.reducer';
 import userReducer from './user.reducer';
 
 const rootReducer = combineReducers({
-   
     category: categoryReducer,
     product: productReducers,
     auth: authReducer,
